@@ -25,7 +25,33 @@ def dummydoc():
 
         (Potential) assumptions:
             The file structure adheres to the standard of folder -> folder(s)
-                                                                 -> file        
+                                                                 -> file
+
+            files.db exists - then we don't need to calculate checksums, 
+            but also don't need to look thru directories or anything - just iterate
+            thru this file, check the checksums, and add paths to dummy-lists on match,
+            something like:
+                    import sqlite3
+
+                    # in dummydocs:
+                    db = sqlite3.connect(<path> + "/_metadata/files.db")
+                    filelist = db.execute("SELECT path, checksum FROM Files)
+                    for path, checksum in filelist:
+                        for i, dummy-checksum in enumerate(dummy-checksums):
+                            if checksum == dummy-checksum:
+                                dummy-lists[i].append(path)
+                    
+                    # ... and then no need for anything recursive!
+                    # Try this in a Git branch? Seems simpler than the alternative tbh!
+
+                    # potentially better way, using an iterator?
+                    # in dummydocs:
+                    # con = sqlite3.connect(<path> + "/_metadata/files.db")
+                    # cur = con.cursor
+                    # for path, checksum in cur.execute("SELECT path, checksum FROM Files)
+                    #   for i, dummy-checksum in enumerate(dummy-checksums):
+                            if checksum == dummy-checksum:
+                                dummy-lists[i].append(path)
     """
 # Test if the given path parameter is valid!
 #   if !Path.exists(<path>):
@@ -33,6 +59,12 @@ def dummydoc():
 
 # Define checksums to look for, put them in a list
     # dummy-checksums = [<checksum of first dummy tiff>, <checksum of second dummy tiff>, ...]
+# Here's the checksums:
+#   corrupted file:     50a33547e3d47c5dba7282c9e7fd72f96415190131b6326ed72327dc1f966c23
+#   empty file:         86b54cf579de41c77966110c6ea2cebcb463497741c0852c3a2fa0eb6147c6bb
+#   no known software:  7505e62d0e47b61298916e49c394a013a2119527738cc072ad3eb2ae6407a913
+#   not preservable:    180dddb2b4563c84caf9fb8eee919c22388b62d86b875613ecb88423b2a0b696
+#   password protected: 1f02c224c2acc2110a8c04cf1232402ad18bf7a1c5404140dfd6cc1f0f61b764
 
 # Create lists for each dummy tiff to house the dummy files we find
 # Pack them in a list?
