@@ -1,15 +1,15 @@
 [tool.poetry]
-name = "YOUR_MODULE_NAME"
+name = "dummydoc"
 version = "0.1.0"
 description = ""
-authors = ["YOUR NAME <YOUR@EMAIL>"]
+authors = ["Jesper Hermansen <jeshe@aarhus.dk>"]
 maintainers = ["Aarhus Stadsarkiv <stadsarkiv@aarhus.dk>"]
 license = "GPL-3.0"
 readme = "README.md"
 homepage = "https://www.aarhusstadsarkiv.dk/"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2"
