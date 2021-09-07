@@ -124,9 +124,10 @@ def dummydoc(file: str) -> None:
         for i in ls:
             tiffDraw.text((x_pos, y_pos), i, fill=0)
             y_pos += textHeight + textVerticalSpacing
-    # for next time: figure out how to draw it nicer-looking? 
-    # Maybe some fonts? 
-    # Also, add headers! Remember to tweak the image size calculations to account for this
+    # for next time: figure out how to draw it nicer-looking?
+    # Maybe some fonts?
+    # Also, add headers! Remember to tweak the
+    # image size calculations to account for this
 
     # And then save it
     tiffFile.save(file[0:-8] + "dummytiffs.tif")
