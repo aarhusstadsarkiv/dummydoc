@@ -60,6 +60,13 @@ def dummydoc(file: str) -> None:
         for i in ls:
             print(i)
 
+    # For easier testing, I'll print out how many of each was found too
+    print("Found this many corrupted file tifs: " + str(len(dummyLists[0])))
+    print("Found this many empty file tifs: " + str(len(dummyLists[1])))
+    print("Found this many no known software tifs: " + str(len(dummyLists[2])))
+    print("Found this many not preservable tifs: " + str(len(dummyLists[3])))
+    print("Found this many password protected tifs: " + str(len(dummyLists[4])))
+
 
 # Potential avenues for optimization:
 #   - Immediately print file somehow instead of storing it in a list?
