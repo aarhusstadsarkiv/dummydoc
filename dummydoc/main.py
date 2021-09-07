@@ -1,5 +1,7 @@
 import argparse
 import sqlite3
+from PIL import Image
+from PIL import ImageDraw
 
 from sqlite3.dbapi2 import Connection
 from typing import List
@@ -48,30 +50,112 @@ def dummydoc(file: str) -> None:
     # would just mean modifying this folder!
 
     # "Connect" to the .db file
-    con: Connection = sqlite3.connect("file:" + file + "?mode=ro", uri=True)
-    # Now, query the .db file, and look thru the result
-    for path, checksum in con.execute("SELECT path, checksum FROM Files"):
-        for idx, dummyChecksum in enumerate(dummyChecksums):
-            if checksum == dummyChecksum:
-                dummyLists[idx].append(path)
+    try:
+        con: Connection = sqlite3.connect(
+            "file:" + file + "?mode=ro", uri=True
+        )
+        # Now, query the .db file, and look thru the result
+        for path, checksum in con.execute(
+            "SELECT aars_path, checksum FROM Files"
+        ):
+            for idx, dummyChecksum in enumerate(dummyChecksums):
+                if checksum == dummyChecksum:
+                    dummyLists[idx].append(path)
 
-    # Finally we'll loop thru the list and print the result
+    # if the path isn't pointing to a valid database file
+    except sqlite3.DatabaseError:
+        print(
+            "Error: "
+            + file
+            + " isn't a path to a valid Digiarch-produced database!"
+        )
+        return
+
+    # Create a .tif file documenting the dummy .tifs found
+    # ... well, I tried using tifffile, but it doesn't actually
+    # convert non-image data to .tif, so a list of strings wouldn't work
+    # Here's my attempt using Pillow instead!
+
+    # To figure out the dimensions required for our
+    # tiff, we'll need to make an unused test img first
+    img: Image = Image.new("1", (5, 5))
+    d: ImageDraw = ImageDraw.Draw(img)
+    # Calculate how much we need to print,
+    # so we can create a tiff of a suitable size
+    totalLinesToPrint: int = 0
+    textWidth: int = 0
+    textHeight: int = 0
+
+    for ls in dummyLists:
+        totalLinesToPrint += len(ls)
+        # Also figure out how tall and wide the biggest string(s) are
+        for i in ls:
+            tempWidth, tempHeight = d.textsize(i)
+            textWidth = max(textWidth, tempWidth)
+            textHeight = max(textHeight, tempHeight)
+
+    textVerticalMargin: int = 5
+    textHorizontalMargin: int = 5
+    textVerticalSpacing: int = 2
+
+    # Dimensions of image:
+    #   Width:  Horizontal margin x 2
+    #           + the width of the widest path
+    #   Height: Vertical margin x 2
+    #           + the height of the "tallest" path x the number of paths
+    #           + (the number of paths - 1) x the spacing between each line
+    tiffFile: Image = Image.new(
+        "1",
+        (
+            textHorizontalMargin * 2 + textWidth,
+            textVerticalMargin * 2
+            + totalLinesToPrint * textHeight
+            + (totalLinesToPrint - 1) * textVerticalSpacing,
+        ),
+        1,
+    )
+    tiffDraw: ImageDraw = ImageDraw.Draw(tiffFile)
+
+    # ... and now we can finally draw the image!
+    x_pos: int = textHorizontalMargin
+    y_pos: int = textVerticalMargin
+
     for ls in dummyLists:
         for i in ls:
-            print(i)
+            tiffDraw.text((x_pos, y_pos), i, fill=0)
+            y_pos += textHeight + textVerticalSpacing
+    # for next time: figure out how to draw it nicer-looking? 
+    # Maybe some fonts? 
+    # Also, add headers! Remember to tweak the image size calculations to account for this
+
+    # And then save it
+    tiffFile.save(file[0:-8] + "dummytiffs.tif")
 
     # For easier testing, I'll print out how many of each was found too
     print("Found this many corrupted file tifs: " + str(len(dummyLists[0])))
     print("Found this many empty file tifs: " + str(len(dummyLists[1])))
     print("Found this many no known software tifs: " + str(len(dummyLists[2])))
     print("Found this many not preservable tifs: " + str(len(dummyLists[3])))
-    print("Found this many password protected tifs: " + str(len(dummyLists[4])))
+    print(
+        "Found this many password protected tifs: " + str(len(dummyLists[4]))
+    )
 
 
 # Potential avenues for optimization:
 #   - Immediately print file somehow instead of storing it in a list?
 #       Not sure if that's feasible when it needs to be
-#       printed as a tiff file later
+#       printed as a tif file later.
+#           Could always write each "type" to their own file!
+#           You can do that as you encounter 'em
+#           Then you can combine the 5 files into 1 by the end,
+#           and convert that to tif
+#           ... would that actually be faster tho?
+#           That's the question. Certainly more complicated
+#
+#   - Move some of the image size calculations to earlier,
+#       so we don't need as many loops thru the strings
+#       ... but this script runs pretty damn fast as-is, so
+#       optimization doesn't seem necessary at this time
 
 
 # Set up argparse stuff
