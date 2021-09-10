@@ -2,6 +2,7 @@ import argparse
 import sqlite3
 from PIL import Image
 from PIL import ImageDraw
+from PIL import ImageFont
 
 from sqlite3.dbapi2 import Connection
 from typing import List
@@ -72,65 +73,9 @@ def dummydoc(file: str) -> None:
         return
 
     # Create a .tif file documenting the dummy .tifs found
-    # ... well, I tried using tifffile, but it doesn't actually
-    # convert non-image data to .tif, so a list of strings wouldn't work
-    # Here's my attempt using Pillow instead!
-
-    # To figure out the dimensions required for our
-    # tiff, we'll need to make an unused test img first
-    img: Image = Image.new("1", (5, 5))
-    d: ImageDraw = ImageDraw.Draw(img)
-    # Calculate how much we need to print,
-    # so we can create a tiff of a suitable size
-    totalLinesToPrint: int = 0
-    textWidth: int = 0
-    textHeight: int = 0
-
-    for ls in dummyLists:
-        totalLinesToPrint += len(ls)
-        # Also figure out how tall and wide the biggest string(s) are
-        for i in ls:
-            tempWidth, tempHeight = d.textsize(i)
-            textWidth = max(textWidth, tempWidth)
-            textHeight = max(textHeight, tempHeight)
-
-    textVerticalMargin: int = 5
-    textHorizontalMargin: int = 5
-    textVerticalSpacing: int = 2
-
-    # Dimensions of image:
-    #   Width:  Horizontal margin x 2
-    #           + the width of the widest path
-    #   Height: Vertical margin x 2
-    #           + the height of the "tallest" path x the number of paths
-    #           + (the number of paths - 1) x the spacing between each line
-    tiffFile: Image = Image.new(
-        "1",
-        (
-            textHorizontalMargin * 2 + textWidth,
-            textVerticalMargin * 2
-            + totalLinesToPrint * textHeight
-            + (totalLinesToPrint - 1) * textVerticalSpacing,
-        ),
-        1,
+    stringToTiffPrinter(
+        unpackDummyLists(dummyLists), file[0:-8] + "dummytiffs.tif"
     )
-    tiffDraw: ImageDraw = ImageDraw.Draw(tiffFile)
-
-    # ... and now we can finally draw the image!
-    x_pos: int = textHorizontalMargin
-    y_pos: int = textVerticalMargin
-
-    for ls in dummyLists:
-        for i in ls:
-            tiffDraw.text((x_pos, y_pos), i, fill=0)
-            y_pos += textHeight + textVerticalSpacing
-    # for next time: figure out how to draw it nicer-looking?
-    # Maybe some fonts?
-    # Also, add headers! Remember to tweak the
-    # image size calculations to account for this
-
-    # And then save it
-    tiffFile.save(file[0:-8] + "dummytiffs.tif")
 
     # For easier testing, I'll print out how many of each was found too
     print("Found this many corrupted file tifs: " + str(len(dummyLists[0])))
@@ -142,21 +87,100 @@ def dummydoc(file: str) -> None:
     )
 
 
-# Potential avenues for optimization:
-#   - Immediately print file somehow instead of storing it in a list?
-#       Not sure if that's feasible when it needs to be
-#       printed as a tif file later.
-#           Could always write each "type" to their own file!
-#           You can do that as you encounter 'em
-#           Then you can combine the 5 files into 1 by the end,
-#           and convert that to tif
-#           ... would that actually be faster tho?
-#           That's the question. Certainly more complicated
-#
-#   - Move some of the image size calculations to earlier,
-#       so we don't need as many loops thru the strings
-#       ... but this script runs pretty damn fast as-is, so
-#       optimization doesn't seem necessary at this time
+# Handles the actual printing work!
+# Maybe spin it into a module? Then it might
+# be useful for printing text files as well
+# Just read them into a list, and call this
+def stringToTiffPrinter(inputList: List[str], dest: str) -> None:
+    """
+    * Takes a list of strings to print, and a destination to save it at
+
+    * Creates a tiff at the given destination
+      with each string in the list on its own line
+    """
+
+    # To figure out the dimensions required for our
+    # tiff, we'll need to make an unused test img first
+    img: Image = Image.new("1", (5, 5))
+    d: ImageDraw = ImageDraw.Draw(img)
+    # Calculate how much we need to print,
+    # so we can create a tiff of a suitable size
+    totalLinesToPrint: int = len(inputList)
+    textWidth: int = 0
+    textHeight: int = 0
+
+    # We'll also need a font, to calculate size
+    # and to actually make the text later!
+    textFont = ImageFont.truetype("arial.ttf", 18)
+
+    # Also figure out how tall and wide the strings are gonna be
+    for s in inputList:
+        tempWidth, tempHeight = d.textsize(s, font=textFont)
+        textWidth = max(textWidth, tempWidth)
+        textHeight += tempHeight
+
+    textVerticalMargin: int = 10
+    textHorizontalMargin: int = 10
+    textVerticalSpacing: int = 2
+
+    # Dimensions of image:
+    #   Width:  Horizontal margin x 2
+    #           + the width of the widest path
+    #   Height: Vertical margin x 2
+    #           + the height of all the text paths combined
+    #           + (the number of paths - 1) x the spacing between each line
+    tiffFile: Image = Image.new(
+        "1",
+        (
+            textHorizontalMargin * 2 + textWidth,
+            textVerticalMargin * 2
+            + textHeight
+            + (totalLinesToPrint - 1) * textVerticalSpacing,
+        ),
+        1,
+    )
+    tiffDraw: ImageDraw = ImageDraw.Draw(tiffFile)
+
+    # ... and now we can finally draw the image!
+    x_pos: int = textHorizontalMargin
+    y_pos: int = textVerticalMargin
+
+    for s in inputList:
+        tiffDraw.text((x_pos, y_pos), s, fill=0, font=textFont)
+        tempWidth, tempHeight = d.textsize(s, font=textFont)
+        y_pos += tempHeight + textVerticalSpacing
+    # !!! for next time: figure out how to draw it nicer-looking?
+    # !!! Maybe some fonts?
+    # !!! Also, add headers! Remember to tweak the
+    # !!! image size calculations to account for this
+
+    # And then save it
+    tiffFile.save(dest)
+
+
+# simple helper function that "unpacks" the multiple
+# dummy lists and converts it into one list
+# it also adds very simple "headers"
+def unpackDummyLists(dummyLists: List[List[str]]) -> List[str]:
+    unpackedList: List[str] = []
+    headerList = [
+        '"Corrupted"',
+        '"Empty"',
+        '"No known software"',
+        '"Not preservable"',
+        '"Password protected"',
+    ]
+
+    for index, ls in enumerate(dummyLists):
+        unpackedList.append(
+            headerList[index] + " dummy tiffs: " + str(len(ls))
+        )
+        # unpackedList.extend(ls)
+        for s in ls:
+            unpackedList.append("        " + s)
+        unpackedList.append("\n")
+
+    return unpackedList[:-1]  # ignoring the newline right at the end
 
 
 # Set up argparse stuff
