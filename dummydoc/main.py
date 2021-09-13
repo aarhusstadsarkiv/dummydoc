@@ -88,15 +88,15 @@ def unpackDummyLists(dummyLists: List[List[str]]) -> List[str]:
         '"Not preservable"',
         '"Password protected"',
     ]
-
     for index, ls in enumerate(dummyLists):
-        unpackedList.append(
-            headerList[index] + " dummy tiffs: " + str(len(ls))
-        )
-        # unpackedList.extend(ls)
-        for s in ls:
-            unpackedList.append("        " + s)
-        unpackedList.append("\n")
+        # only add header if there are files to go under it
+        if len(ls) > 0:
+            unpackedList.append(
+                headerList[index] + " dummy tiffs: " + str(len(ls))
+            )
+            for s in ls:
+                unpackedList.append("        " + s)
+            unpackedList.append("\n")
 
     return unpackedList[:-1]  # ignoring the newline right at the end
 
