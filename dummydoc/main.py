@@ -1,8 +1,6 @@
 import argparse
 import sqlite3
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageFont
+import tiffprinter
 
 from sqlite3.dbapi2 import Connection
 from typing import List
@@ -73,89 +71,9 @@ def dummydoc(file: str) -> None:
         return
 
     # Create a .tif file documenting the dummy .tifs found
-    stringToTiffPrinter(
+    tiffprinter.stringToTiffPrinter(
         unpackDummyLists(dummyLists), file[0:-8] + "dummytiffs.tif"
     )
-
-    # For easier testing, I'll print out how many of each was found too
-    print("Found this many corrupted file tifs: " + str(len(dummyLists[0])))
-    print("Found this many empty file tifs: " + str(len(dummyLists[1])))
-    print("Found this many no known software tifs: " + str(len(dummyLists[2])))
-    print("Found this many not preservable tifs: " + str(len(dummyLists[3])))
-    print(
-        "Found this many password protected tifs: " + str(len(dummyLists[4]))
-    )
-
-
-# Handles the actual printing work!
-# Maybe spin it into a module? Then it might
-# be useful for printing text files as well
-# Just read them into a list, and call this
-def stringToTiffPrinter(inputList: List[str], dest: str) -> None:
-    """
-    * Takes a list of strings to print, and a destination to save it at
-
-    * Creates a tiff at the given destination
-      with each string in the list on its own line
-    """
-
-    # To figure out the dimensions required for our
-    # tiff, we'll need to make an unused test img first
-    img: Image = Image.new("1", (5, 5))
-    d: ImageDraw = ImageDraw.Draw(img)
-    # Calculate how much we need to print,
-    # so we can create a tiff of a suitable size
-    totalLinesToPrint: int = len(inputList)
-    textWidth: int = 0
-    textHeight: int = 0
-
-    # We'll also need a font, to calculate size
-    # and to actually make the text later!
-    textFont = ImageFont.truetype("arial.ttf", 18)
-
-    # Also figure out how tall and wide the strings are gonna be
-    for s in inputList:
-        tempWidth, tempHeight = d.textsize(s, font=textFont)
-        textWidth = max(textWidth, tempWidth)
-        textHeight += tempHeight
-
-    textVerticalMargin: int = 10
-    textHorizontalMargin: int = 10
-    textVerticalSpacing: int = 2
-
-    # Dimensions of image:
-    #   Width:  Horizontal margin x 2
-    #           + the width of the widest path
-    #   Height: Vertical margin x 2
-    #           + the height of all the text paths combined
-    #           + (the number of paths - 1) x the spacing between each line
-    tiffFile: Image = Image.new(
-        "1",
-        (
-            textHorizontalMargin * 2 + textWidth,
-            textVerticalMargin * 2
-            + textHeight
-            + (totalLinesToPrint - 1) * textVerticalSpacing,
-        ),
-        1,
-    )
-    tiffDraw: ImageDraw = ImageDraw.Draw(tiffFile)
-
-    # ... and now we can finally draw the image!
-    x_pos: int = textHorizontalMargin
-    y_pos: int = textVerticalMargin
-
-    for s in inputList:
-        tiffDraw.text((x_pos, y_pos), s, fill=0, font=textFont)
-        tempWidth, tempHeight = d.textsize(s, font=textFont)
-        y_pos += tempHeight + textVerticalSpacing
-    # !!! for next time: figure out how to draw it nicer-looking?
-    # !!! Maybe some fonts?
-    # !!! Also, add headers! Remember to tweak the
-    # !!! image size calculations to account for this
-
-    # And then save it
-    tiffFile.save(dest)
 
 
 # simple helper function that "unpacks" the multiple
