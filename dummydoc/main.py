@@ -101,30 +101,6 @@ def unpackDummyLists(dummyLists: List[List[str]]) -> str:
 
     return unpackedList[:-2]  # ignoring the newline right at the end
 
-
-"""
-def unpackDummyLists(dummyLists: List[List[str]]) -> List[str]:
-    unpackedList: List[str] = []
-    headerList = [
-        '"Corrupted"',
-        '"Empty"',
-        '"No known software"',
-        '"Not preservable"',
-        '"Password protected"',
-    ]
-    for index, ls in enumerate(dummyLists):
-        # only add header if there are files to go under it
-        if len(ls) > 0:
-            unpackedList.append(
-                headerList[index] + " dummy tiffs: " + str(len(ls))
-            )
-            for s in ls:
-                unpackedList.append("        " + s)
-            unpackedList.append("\n")
-
-    return unpackedList[:-1]  # ignoring the newline right at the end
-"""
-
 # Set up argparse stuff
 # Not sure if this is where it should go
 
