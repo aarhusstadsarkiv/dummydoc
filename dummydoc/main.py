@@ -164,16 +164,23 @@ def stringToTiffPrinter(inputList: List[str], dest: str) -> None:
 def unpackDummyLists(dummyLists: List[List[str]]) -> List[str]:
     unpackedList: List[str] = []
     headerList = [
-        '"Corrupted"',
-        '"Empty"',
-        '"No known software"',
-        '"Not preservable"',
-        '"Password protected"',
+        '"Corrupted"', #korrumperede filer
+        '"Empty"', #tomme filer
+        '"No known software"', #filer uden en konverteringsløsning
+        '"Not preservable"', #ikkebevaringsværdige filer
+        '"Password protected"', #kodeordsbeskyttede filer
     ]
+
+    """ 
+    Dette er en oversigt over erstatningsdokumenter for digitale filer, som af følgende årsager ikke er blevet konverteret korrekt af Aarhus Stadsarkiv under produktionen af denne arkiveringsverion.
+    Der er filer, som ikke er bevaringsværdige, men som ikke blev sorteret fra af leverandøren, før dataudtrækket blev leveret til Aarhus Stadsarkiv.
+    Der er også filer, som oprindeligt enten har været tomme eller korrumperede og derfor ikke mulige at reparere, samt kodeordsbeskyttede filer, som det ikke har været muligt at bryde koden på og trække ud det oprindelige system.
+    Derudover er der filer, hvor der ikke kunne findes en softwareløsning, som kunne konvertere dem til et bevaringsværdigt format.
+    """
 
     for index, ls in enumerate(dummyLists):
         unpackedList.append(
-            headerList[index] + " dummy tiffs: " + str(len(ls))
+            headerList[index] + " dummy tiffs: " + str(len(ls)) #"Antallet af erstatningsdokumenter for " + headerList[index] + "er" + str(len(ls)) + "på følgende placeringer:"
         )
         # unpackedList.extend(ls)
         for s in ls:
