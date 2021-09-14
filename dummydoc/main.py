@@ -77,8 +77,32 @@ def dummydoc(file: str) -> None:
 
 
 # simple helper function that "unpacks" the multiple
-# dummy lists and converts it into one list
+# dummy lists and converts it into a string
 # it also adds very simple "headers"
+def unpackDummyLists(dummyLists: List[List[str]]) -> str:
+    unpackedList: str = ""
+    headerList = [
+        '"Corrupted"',
+        '"Empty"',
+        '"No known software"',
+        '"Not preservable"',
+        '"Password protected"',
+    ]
+    for index, ls in enumerate(dummyLists):
+        # only add header if there are files to go under it
+        if len(ls) > 0:
+            unpackedList += (
+                headerList[index] + " dummy tiffs: " + str(len(ls)) + "\n"
+            )
+
+            for s in ls:
+                unpackedList += "        " + s + "\n"
+            unpackedList += "\n"
+
+    return unpackedList[:-2]  # ignoring the newline right at the end
+
+
+"""
 def unpackDummyLists(dummyLists: List[List[str]]) -> List[str]:
     unpackedList: List[str] = []
     headerList = [
@@ -99,7 +123,7 @@ def unpackDummyLists(dummyLists: List[List[str]]) -> List[str]:
             unpackedList.append("\n")
 
     return unpackedList[:-1]  # ignoring the newline right at the end
-
+"""
 
 # Set up argparse stuff
 # Not sure if this is where it should go
