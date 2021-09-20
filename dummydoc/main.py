@@ -83,16 +83,16 @@ def unpackDummyLists(dummyLists: List[List[str]]) -> str:
     unpackedList: str = ""
     # ignoring flake8 linelength check for the next 4 lines
     unpackedList += (
-        "Dette er en oversigt over erstatningsdokumenter for digitale filer, som af følgende årsager ikke\n"
-        + "er blevet konverteret korrekt af Aarhus Stadsarkiv under produktionen af denne arkiveringsverion.\n"
-        + "Der er filer som ikke er bevaringsværdige, men som ikke blev sorteret fra af leverandøren før\n"
-        + "dataudtrækket blev leveret til Aarhus Stadsarkiv. Der er også filer som oprindeligt enten har\n" 
-        + "været tomme eller korrumperede og derfor ikke er mulige at reparere, samt kodeordsbeskyttede\n" 
-        + "filer som det ikke har været muligt at bryde koden på og trække ud fra det oprindelige system.\n" 
-        + "Derudover er der filer, hvor der ikke kunne findes en softwareløsning som kunne konvertere dem\n"
-        + "til et bevaringsværdigt format.\n\n" # noqa E501
+        "Dette er en oversigt over erstatningsdokumenter for digitale filer, som af følgende årsager ikke\n" # noqa E501
+        + "er blevet konverteret korrekt af Aarhus Stadsarkiv under produktionen af denne arkiveringsverion.\n" # noqa E501
+        + "Der er filer som ikke er bevaringsværdige, men som ikke blev sorteret fra af leverandøren før\n" # noqa E501
+        + "dataudtrækket blev leveret til Aarhus Stadsarkiv. Der er også filer som oprindeligt enten har\n" # noqa E501
+        + "været tomme eller korrumperede og derfor ikke er mulige at reparere, samt kodeordsbeskyttede\n" # noqa E501
+        + "filer som det ikke har været muligt at bryde koden på og trække ud fra det oprindelige system.\n" # noqa E501
+        + "Derudover er der filer, hvor der ikke kunne findes en softwareløsning som kunne konvertere dem\n" # noqa E501
+        + "til et bevaringsværdigt format.\n\n"  # noqa E501
     )
-    
+
     headerList = [
         "korrumperede filer",
         "tomme filer",
