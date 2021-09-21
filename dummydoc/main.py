@@ -72,7 +72,7 @@ def dummydoc(file: str) -> None:
 
     # Create a .tif file documenting the dummy .tifs found
     tiffprinter.stringToTiffPrinter(
-        unpackDummyLists(dummyLists), file[0:-8] + "dummytiffs.tif"
+        unpackDummyLists(dummyLists), file[0:-8] + "dummytiffs.tiff"
     )
 
 
