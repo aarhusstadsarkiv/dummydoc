@@ -1,7 +1,6 @@
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
-from pathlib import Path
 
 
 def stringToTiffPrinter(input: str, dest: str) -> None:
@@ -68,5 +67,4 @@ def stringToTiffPrinter(input: str, dest: str) -> None:
     )
 
     # And then save it
-    tiffFile.save(dest.as_posix(), format="tiff", compression="group4")
-    # tiffFile.save(dest)
+    tiffFile.save(dest, format="tiff", compression="group4")
