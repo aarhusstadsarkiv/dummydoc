@@ -9,6 +9,8 @@ def stringToTiffPrinter(input: str, dest: str) -> None:
 
     * Creates a tiff at the given destination
 
+    * Requires: libtiff
+
     * Assumption: the dest value ends in .tiff (or .tif)
 
     * Assumption: the dest value is a valid path
@@ -25,7 +27,11 @@ def stringToTiffPrinter(input: str, dest: str) -> None:
 
     # We'll also need a font, to calculate size
     # and to actually make the text later!
-    textFont = ImageFont.truetype("consola.ttf", 18)
+    try:
+        textFont = ImageFont.truetype("consola.ttf", 18)
+    # for ubuntu compatibility
+    except OSError:
+        textFont = ImageFont.load_default()
 
     textVerticalMargin: int = 20
     textHorizontalMargin: int = 16
@@ -61,4 +67,4 @@ def stringToTiffPrinter(input: str, dest: str) -> None:
     )
 
     # And then save it
-    tiffFile.save(dest)
+    tiffFile.save(dest, format="tiff", compression="group4")
