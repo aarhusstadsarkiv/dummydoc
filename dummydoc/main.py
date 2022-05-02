@@ -12,34 +12,52 @@ def dummydoc(file: str) -> None:
 
     * Prints a list of every dummy tiff file entry in the database
     """
-    # Define checksums to look for, put them in a list
-    dummyChecksums: List[str] = []
+    # Define checksums to look for, put them in a list.
+    # We're using a list of lists 'cus we need to check for both
+    # the new, compressed templates and the old, uncompressed ones
+    # JUST to be safe!
+    dummyChecksumCollection: List[List[str]] = [[] for _ in range(5)]
 
-    # "corrupted file" checksum
-    dummyChecksums.append(
+    # "corrupted file" checksums
+    dummyChecksumCollection[0].append(
         "50a33547e3d47c5dba7282c9e7fd72f96415190131b6326ed72327dc1f966c23"
     )
-    # "empty file" checksum
-    dummyChecksums.append(
+    dummyChecksumCollection[0].append(
+        "0e1d4f99448afb96883a8ddc2013ed118b50bd13867c40d76366fe51741a4879"
+    )
+    # "empty file" checksums
+    dummyChecksumCollection[1].append(
         "86b54cf579de41c77966110c6ea2cebcb463497741c0852c3a2fa0eb6147c6bb"
     )
-    # "no known software" checksum
-    dummyChecksums.append(
+    dummyChecksumCollection[1].append(
+        "cc35f2524ed5d5241b76cf0ffade8fd9b6ae7ec1e2178572ad3fdeadbb6b7c29"
+    )
+    # "no known software" checksums
+    dummyChecksumCollection[2].append(
         "7505e62d0e47b61298916e49c394a013a2119527738cc072ad3eb2ae6407a913"
     )
-    # "not preservable" checksum
-    dummyChecksums.append(
+    dummyChecksumCollection[2].append(
+        "08992a01890a2a58c45cf0d547a93c49ab55e2c2ea92da6e978b5204aa9b6e26"
+    )
+    # "not preservable" checksums
+    dummyChecksumCollection[3].append(
         "180dddb2b4563c84caf9fb8eee919c22388b62d86b875613ecb88423b2a0b696"
     )
-    # "password protected" checksum
-    dummyChecksums.append(
+    dummyChecksumCollection[3].append(
+        "58d6193d4f1456d92b74b4cfb77bea63b8a43669fab8e848c434b400e519898d"
+    )
+    # "password protected" checksums
+    dummyChecksumCollection[4].append(
         "1f02c224c2acc2110a8c04cf1232402ad18bf7a1c5404140dfd6cc1f0f61b764"
+    )
+    dummyChecksumCollection[4].append(
+        "a4c8b06ec798f8cf98fc39935587af060496cfccb01fd8a626d7a3b731264601"
     )
 
     # Create lists for each dummy tiff to house the dummy files we find
     # Pack them in a list?
     dummyLists: List[List[str]] = []
-    for i in dummyChecksums:
+    for i in dummyChecksumCollection:
         dummyLists.append([])
     # This way the structure of the program is extensible and flexible
     # - if the dummy files change or new ones are added, the only thing
@@ -57,8 +75,8 @@ def dummydoc(file: str) -> None:
         for path, checksum in con.execute(
             "SELECT aars_path, checksum FROM Files"
         ):
-            for idx, dummyChecksum in enumerate(dummyChecksums):
-                if checksum == dummyChecksum:
+            for idx, dummyChecksums in enumerate(dummyChecksumCollection):
+                if checksum in dummyChecksums:
                     dummyLists[idx].append(path)
 
     # if the path isn't pointing to a valid database file
@@ -83,13 +101,13 @@ def unpackDummyLists(dummyLists: List[List[str]]) -> str:
     unpackedList: str = ""
     # ignoring flake8 linelength check for the next 4 lines
     unpackedList += (
-        "Dette er en oversigt over erstatningsdokumenter for digitale filer, som af følgende årsager ikke\n" # noqa E501
-        + "er blevet konverteret korrekt af Aarhus Stadsarkiv under produktionen af denne arkiveringsverion.\n" # noqa E501
-        + "Der er filer som ikke er bevaringsværdige, men som ikke blev sorteret fra af leverandøren før\n" # noqa E501
-        + "dataudtrækket blev leveret til Aarhus Stadsarkiv. Der er også filer som oprindeligt enten har\n" # noqa E501
-        + "været tomme eller korrumperede og derfor ikke er mulige at reparere, samt kodeordsbeskyttede\n" # noqa E501
-        + "filer som det ikke har været muligt at bryde koden på og trække ud fra det oprindelige system.\n" # noqa E501
-        + "Derudover er der filer, hvor der ikke kunne findes en softwareløsning som kunne konvertere dem\n" # noqa E501
+        "Dette er en oversigt over erstatningsdokumenter for digitale filer, som af følgende årsager ikke\n"  # noqa E501
+        + "er blevet konverteret korrekt af Aarhus Stadsarkiv under produktionen af denne arkiveringsverion.\n"  # noqa E501
+        + "Der er filer som ikke er bevaringsværdige, men som ikke blev sorteret fra af leverandøren før\n"  # noqa E501
+        + "dataudtrækket blev leveret til Aarhus Stadsarkiv. Der er også filer som oprindeligt enten har\n"  # noqa E501
+        + "været tomme eller korrumperede og derfor ikke er mulige at reparere, samt kodeordsbeskyttede\n"  # noqa E501
+        + "filer som det ikke har været muligt at bryde koden på og trække ud fra det oprindelige system.\n"  # noqa E501
+        + "Derudover er der filer, hvor der ikke kunne findes en softwareløsning som kunne konvertere dem\n"  # noqa E501
         + "til et bevaringsværdigt format.\n\n"  # noqa E501
     )
 
